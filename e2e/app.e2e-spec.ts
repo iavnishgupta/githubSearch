@@ -1,8 +1,7 @@
-import { browser, element, by } from 'protractor';
 
 describe('QuickStart E2E Tests', function () {
 
-  let expectedMsg = 'My First Angular App';
+  let expectedMsg = 'My First Angular 2 App';
 
 
   beforeEach(function () {

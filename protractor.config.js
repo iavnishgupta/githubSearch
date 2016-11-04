@@ -30,7 +30,7 @@ exports.config = {
   specs: ['**/*e2e-spec.js' ],
 
 
-  // For angular tests
+  // For angular2 tests
   useAllAngular2AppRoots: true,
 
   // Base URL for application server
@@ -49,6 +49,8 @@ exports.config = {
     // console.log('browser.params:' + JSON.stringify(browser.params));
     jasmine.getEnv().addReporter(new Reporter( browser.params )) ;
 
+    global.sendKeys = sendKeys;
+
     // Allow changing bootstrap mode to NG1 for upgrade tests
     global.setProtractorToNg1Mode = function() {
       browser.useAllAngular2AppRoots = false;
@@ -63,6 +65,16 @@ exports.config = {
     print: function() {}
   }
 };
+
+// Hack - because of bug with protractor send keys
+function sendKeys(element, str) {
+  return str.split('').reduce(function (promise, char) {
+    return promise.then(function () {
+      return element.sendKeys(char);
+    });
+  }, element.getAttribute('value'));
+  // better to create a resolved promise here but ... don't know how with protractor;
+  }
 
 // Custom reporter
 function Reporter(options) {
@@ -117,26 +129,7 @@ function Reporter(options) {
     fs.appendFileSync(outputFile, output);
   };
 
-  function ensureDirectoryExistence(filePath) {
-    var dirname = path.dirname(filePath);
-    if (directoryExists(dirname)) {
-      return true;
-    }
-    ensureDirectoryExistence(dirname);
-    fs.mkdirSync(dirname);
-  }
-
-  function directoryExists(path) {
-    try {
-      return fs.statSync(path).isDirectory();
-    }
-    catch (err) {
-      return false;
-    }
-  }
-
   function initOutputFile(outputFile) {
-    ensureDirectoryExistence(outputFile);
     var header = "Protractor results for: " + (new Date()).toLocaleString() + "\n\n";
     fs.writeFileSync(outputFile, header);
   }
